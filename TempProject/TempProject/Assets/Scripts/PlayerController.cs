@@ -7,7 +7,7 @@ public class PlayerController : MonoBehaviour
     InputSystem_Actions _inputActions;
 
     [SerializeField] Transform _groundCheck;
-    [SerializeField] float _groundCheckDistance = 0.01f;
+    [SerializeField] float _groundCheckDistance = 0.1f;
     [SerializeField] LayerMask _groudLayer;
 
 
@@ -20,6 +20,15 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] float _moveSpeed = 5f;
     [SerializeField] public float _jumpForce = 5f;
+
+    // 코요테 타임(땅에서 떨어진 뒤 점프 허용 시간)
+    [SerializeField] private float _coyoteTime = 0.15f;
+
+    // 점프 입력시간
+    [SerializeField] private float _jumpBufferTime = 0.15f;
+
+    private float _coyoteTimeCounter;
+    private float _jumpBufferCounter;
 
     public IdleState Idle {  get; private set; }
     public MoveState Move { get; private set; }
@@ -63,6 +72,11 @@ public class PlayerController : MonoBehaviour
     {
         IsGround();
         Flip();
+        HandleCoyoteTime();
+        HandleJumpBuffer();
+        _animator.SetBool("IsGrounded", _isGrounded);
+        _animator.SetFloat("VelocityY", _rb.linearVelocity.y);
+
         _stateMachine.Update();
     }
 
@@ -85,7 +99,55 @@ public class PlayerController : MonoBehaviour
         _stateMachine.ChangeState(newState);
     }
 
-    private void Flip()
+    private void HandleCoyoteTime()
+    {
+        if (_isGrounded)
+        {
+            // 땅에 있으면 카운터 리셋
+            _coyoteTimeCounter = _coyoteTime;
+        }
+
+        else
+        {
+            // 공중이면 시간 감소
+            _coyoteTimeCounter -= Time.deltaTime;
+        }
+    }
+
+    private void HandleJumpBuffer()
+    {
+        if (_jumpBufferCounter > 0)
+        _jumpBufferCounter -= Time.deltaTime;
+    }
+
+    public bool CanJump()
+    {
+        bool result = _coyoteTimeCounter > 0 && _jumpBufferCounter > 0;
+
+        Debug.Log("Ground:" + _isGrounded +
+              " Coyote:" + _coyoteTimeCounter +
+              " Buffer:" + _jumpBufferCounter +
+              " Result:" + result);
+        return result;
+    }
+
+    public void ConsumeJump()
+    {
+        _coyoteTimeCounter = 0;
+        _jumpBufferCounter = 0;
+    }
+
+    private void CutJump()
+    {
+        if (_rb.linearVelocity.y > 0)
+        {
+            _rb.linearVelocity = new Vector2(
+                _rb.linearVelocity.x,
+                _rb.linearVelocity.y * 0.5f);
+        }
+    }
+
+    private void Flip() // 방향전환
     {
         if(_moveInput > 0 && !_isFacingRight)
         {
@@ -114,15 +176,14 @@ public class PlayerController : MonoBehaviour
             _groundCheckDistance,
             _groudLayer);
 
-        if (hit.collider != null)
-        {
-            _isGrounded = true;
-        }
+        Debug.DrawRay(_groundCheck.position,
+        Vector2.down * _groundCheckDistance,
+        Color.green);
 
-        else
-        {
-            _isGrounded = false;
-        }
+        _isGrounded = hit.collider != null;
+
+        if (_isGrounded)
+            Debug.Log("바닥 감지됨");
     }
 
     void OnMove(InputAction.CallbackContext ctx)
@@ -131,11 +192,19 @@ public class PlayerController : MonoBehaviour
         _moveInput = value.x;
     }
 
-    void OnJump(InputAction.CallbackContext ctx)
+    public void OnJump(InputAction.CallbackContext ctx)
     {
-        if (!_isGrounded) return;
+        if (ctx.performed)
+        {
+            Debug.Log("점프 입력 감지됨");
+            _jumpBufferCounter = _jumpBufferTime;
+        }
 
-        _stateMachine.ChangeState(Jump);
+        if (ctx.canceled)
+        {
+            CutJump();
+        }
+
     }
 
     void Movement()

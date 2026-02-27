@@ -613,6 +613,8 @@ MonoBehaviour:
     m_Bits: 64
   _moveSpeed: 3
   _jumpForce: 5
+  _coyoteTime: 0.15
+  _jumpBufferTime: 0.15
 --- !u!95 &2145249203
 Animator:
   serializedVersion: 7

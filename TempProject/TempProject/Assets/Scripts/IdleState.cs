@@ -12,7 +12,7 @@ public class IdleState : IPlayerState
     public void Enter()
     {
         _player._animator.SetBool("IsMove", false);
-        _player._animator.SetBool("IsJump", false);
+        
     }
 
     public void Exit()
@@ -22,6 +22,13 @@ public class IdleState : IPlayerState
 
     public void Update()
     {
+        if (_player.CanJump())
+        {
+            _player.ConsumeJump();
+            _player.ChangeState(_player.Jump);
+            return;
+        }
+
         if (_player._moveInput != 0)
         {
             _player.ChangeState(_player.Move);
