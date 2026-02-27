@@ -6,6 +6,9 @@ public class PlayerController : MonoBehaviour
     PlayerStateMachine _stateMachine;
     InputSystem_Actions _inputActions;
 
+    private PlayerHealth _playerHealth;
+    private PlayerRespawn _playerRespawn;
+
     [SerializeField] Transform _groundCheck;
     [SerializeField] float _groundCheckDistance = 0.1f;
     [SerializeField] LayerMask _groudLayer;
@@ -84,6 +87,9 @@ public class PlayerController : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
+        _playerHealth = GetComponent<PlayerHealth>();
+        _playerRespawn = GetComponent<PlayerRespawn>();
+        GameManager.Instance.RegisterPlayer(_playerRespawn, _playerHealth);
         _stateMachine = new PlayerStateMachine();
         _inputActions = new InputSystem_Actions();
         _originalScale = transform.localScale;
@@ -124,10 +130,6 @@ public class PlayerController : MonoBehaviour
     {
         bool result = _coyoteTimeCounter > 0 && _jumpBufferCounter > 0;
 
-        Debug.Log("Ground:" + _isGrounded +
-              " Coyote:" + _coyoteTimeCounter +
-              " Buffer:" + _jumpBufferCounter +
-              " Result:" + result);
         return result;
     }
 
