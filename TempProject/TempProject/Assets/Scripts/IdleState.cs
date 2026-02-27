@@ -11,7 +11,8 @@ public class IdleState : IPlayerState
 
     public void Enter()
     {
-        
+        _player._animator.SetBool("IsMove", false);
+        _player._animator.SetBool("IsJump", false);
     }
 
     public void Exit()

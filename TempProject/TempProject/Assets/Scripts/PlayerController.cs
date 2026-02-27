@@ -7,11 +7,13 @@ public class PlayerController : MonoBehaviour
     InputSystem_Actions _inputActions;
 
     [SerializeField] Transform _groundCheck;
-    [SerializeField] float _groundCheckDistance = 0.1f;
+    [SerializeField] float _groundCheckDistance = 0.01f;
     [SerializeField] LayerMask _groudLayer;
 
 
     public Rigidbody2D _rb { get; private set; }
+
+    public Animator _animator {  get; private set; }
 
     public float _moveInput {  get; private set; }
     public bool _isGrounded {  get; private set; }
@@ -22,6 +24,9 @@ public class PlayerController : MonoBehaviour
     public IdleState Idle {  get; private set; }
     public MoveState Move { get; private set; }
     public JumpState Jump { get; private set; }
+
+    private Vector3 _originalScale;
+    private bool _isFacingRight = true;
 
 
     private void Awake()
@@ -57,14 +62,17 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         IsGround();
+        Flip();
         _stateMachine.Update();
     }
 
     private void Init()
     {
         _rb = GetComponent<Rigidbody2D>();
+        _animator = GetComponent<Animator>();
         _stateMachine = new PlayerStateMachine();
         _inputActions = new InputSystem_Actions();
+        _originalScale = transform.localScale;
         Idle = new IdleState(this);
         Move = new MoveState(this);
         Jump = new JumpState(this);
@@ -75,6 +83,27 @@ public class PlayerController : MonoBehaviour
     public void ChangeState(IPlayerState newState)
     {
         _stateMachine.ChangeState(newState);
+    }
+
+    private void Flip()
+    {
+        if(_moveInput > 0 && !_isFacingRight)
+        {
+            _isFacingRight = true;
+
+            Vector3 scale = _originalScale;
+            scale.x = Mathf.Abs(scale.x);
+            transform.localScale = scale;
+        }
+
+        else if(_moveInput < 0 && _isFacingRight)
+        {
+            _isFacingRight = false;
+
+            Vector3 scale = _originalScale;
+            scale.x = -Mathf.Abs(scale.x);
+            transform.localScale = scale;
+        }
     }
 
     void IsGround()
