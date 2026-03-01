@@ -273,6 +273,9 @@ MonoBehaviour:
   _groudLayer:
     serializedVersion: 2
     m_Bits: 64
+  _fireballPool: {fileID: 0}
+  _isFireMode: 0
+  _fireCooldown: 0.3
   _moveSpeed: 5
   _jumpForce: 5
   _coyoteTime: 0.15

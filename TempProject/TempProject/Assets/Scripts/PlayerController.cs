@@ -13,6 +13,18 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _groundCheckDistance = 0.1f;
     [SerializeField] LayerMask _groudLayer;
 
+    [Header("Fireball Pool")]
+    [SerializeField] private FireballPool _fireballPool;
+
+    [Header("Fire Mode")]
+    [Tooltip("Fire Mode 활성 여부")]
+    [SerializeField] private bool _isFireMode = false;
+
+
+    [SerializeField] private float _fireCooldown = 0.3f;
+
+    private float _lastFireTime;
+
 
     public Rigidbody2D _rb { get; private set; }
 
@@ -80,6 +92,11 @@ public class PlayerController : MonoBehaviour
         _animator.SetBool("IsGrounded", _isGrounded);
         _animator.SetFloat("VelocityY", _rb.linearVelocity.y);
 
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            Fire();
+        }
+
         _stateMachine.Update();
     }
 
@@ -103,6 +120,39 @@ public class PlayerController : MonoBehaviour
     public void ChangeState(IPlayerState newState)
     {
         _stateMachine.ChangeState(newState);
+    }
+
+    public void Fire()
+    {
+        if (!_isFireMode) return;
+
+        if (Time.time < _lastFireTime + _fireCooldown)
+            return;
+
+        _lastFireTime = Time.time;
+
+        Fireball fb = _fireballPool.GetFireball();
+
+        if (fb == null)
+            return;
+
+        fb.transform.position = transform.position;
+
+        Vector2 dir = transform.localScale.x > 0 ? Vector2.right : Vector2.left;
+
+        fb.Init(dir);
+    }
+
+    // Fire Mode 활성화
+    public void EnableFireMode()
+    {
+        _isFireMode = true;
+    }
+
+    // Fire Mode 비활성화
+    public void DisableFireMode()
+    {
+        _isFireMode = false;
     }
 
     private void HandleCoyoteTime()

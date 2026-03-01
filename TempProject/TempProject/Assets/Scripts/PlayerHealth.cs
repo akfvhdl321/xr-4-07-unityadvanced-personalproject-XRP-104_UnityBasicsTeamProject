@@ -63,6 +63,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     {
         Debug.Log("플레이어 사망");
         OnDeath?.Invoke();
+        GetComponent<PlayerController>().DisableFireMode();
     }
 
     public void ResetHealth()
