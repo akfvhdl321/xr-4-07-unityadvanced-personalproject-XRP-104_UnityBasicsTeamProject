@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
@@ -17,41 +17,47 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private FireballPool _fireballPool;
 
     [Header("Fire Mode")]
-    [Tooltip("Fire Mode È°¼º ¿©ºÎ")]
     [SerializeField] private bool _isFireMode = false;
 
+    [Header("Jump Boost")]
+    [SerializeField] private float _jumpBoostMultiplier = 1.5f;
+    [SerializeField] private float _jumpBoostDuration = 5f;
+
+    private bool _isJumpBoost;
+    private float _jumpBoostEndTime;
 
     [SerializeField] private float _fireCooldown = 0.3f;
-
     private float _lastFireTime;
 
-
     public Rigidbody2D _rb { get; private set; }
+    public Animator _animator { get; private set; }
 
-    public Animator _animator {  get; private set; }
-
-    public float _moveInput {  get; private set; }
-    public bool _isGrounded {  get; private set; }
+    public float _moveInput { get; private set; }
+    public bool _isGrounded { get; private set; }
 
     [SerializeField] float _moveSpeed = 5f;
     [SerializeField] public float _jumpForce = 5f;
 
-    // ÄÚ¿äÅ× Å¸ÀÓ(¶¥¿¡¼­ ¶³¾îÁø µÚ Á¡ÇÁ Çã¿ë ½Ã°£)
     [SerializeField] private float _coyoteTime = 0.15f;
-
-    // Á¡ÇÁ ÀÔ·Â½Ã°£
     [SerializeField] private float _jumpBufferTime = 0.15f;
 
     private float _coyoteTimeCounter;
     private float _jumpBufferCounter;
 
-    public IdleState Idle {  get; private set; }
+    public IdleState Idle { get; private set; }
     public MoveState Move { get; private set; }
     public JumpState Jump { get; private set; }
 
     private Vector3 _originalScale;
     private bool _isFacingRight = true;
 
+    // ===============================
+    // UI ì ‘ê·¼ìš© í”„ë¡œí¼í‹°
+    // ===============================
+    public bool IsJumpBoostActive => _isJumpBoost;
+
+    public float JumpBoostRemainingTime =>
+        Mathf.Max(0f, _jumpBoostEndTime - Time.time);
 
     private void Awake()
     {
@@ -65,8 +71,6 @@ public class PlayerController : MonoBehaviour
         _inputActions.Player.Move.performed += OnMove;
         _inputActions.Player.Move.canceled += OnMove;
         _inputActions.Player.Jump.performed += OnJump;
-
-        
     }
 
     private void OnDisable()
@@ -89,13 +93,16 @@ public class PlayerController : MonoBehaviour
         Flip();
         HandleCoyoteTime();
         HandleJumpBuffer();
+
         _animator.SetBool("IsGrounded", _isGrounded);
         _animator.SetFloat("VelocityY", _rb.linearVelocity.y);
 
         if (Input.GetKeyDown(KeyCode.F))
-        {
             Fire();
-        }
+
+        // JumpBoost ì‹œê°„ ë§Œë£Œ ì²˜ë¦¬
+        if (_isJumpBoost && Time.time >= _jumpBoostEndTime)
+            DisableJumpBoost();
 
         _stateMachine.Update();
     }
@@ -106,10 +113,14 @@ public class PlayerController : MonoBehaviour
         _animator = GetComponent<Animator>();
         _playerHealth = GetComponent<PlayerHealth>();
         _playerRespawn = GetComponent<PlayerRespawn>();
+
         GameManager.Instance.RegisterPlayer(_playerRespawn, _playerHealth);
+
         _stateMachine = new PlayerStateMachine();
         _inputActions = new InputSystem_Actions();
+
         _originalScale = transform.localScale;
+
         Idle = new IdleState(this);
         Move = new MoveState(this);
         Jump = new JumpState(this);
@@ -122,71 +133,85 @@ public class PlayerController : MonoBehaviour
         _stateMachine.ChangeState(newState);
     }
 
+    // ===============================
+    // Fire
+    // ===============================
     public void Fire()
     {
         if (!_isFireMode) return;
-
-        if (Time.time < _lastFireTime + _fireCooldown)
-            return;
+        if (Time.time < _lastFireTime + _fireCooldown) return;
 
         _lastFireTime = Time.time;
 
         Fireball fb = _fireballPool.GetFireball();
-
-        if (fb == null)
-            return;
+        if (fb == null) return;
 
         fb.transform.position = transform.position;
 
         Vector2 dir = transform.localScale.x > 0 ? Vector2.right : Vector2.left;
-
         fb.Init(dir);
     }
 
-    // Fire Mode È°¼ºÈ­
-    public void EnableFireMode()
+    public void EnableFireMode() => _isFireMode = true;
+
+    public void DisableFireMode() => _isFireMode = false;
+
+    // ===============================
+    // Jump Boost ì‹œìŠ¤í…œ
+    // ===============================
+    public void EnableJumpBoost()
     {
-        _isFireMode = true;
+        _isJumpBoost = true;
+        _jumpBoostEndTime = Time.time + _jumpBoostDuration; // â˜… ê°±ì‹  ë°©ì‹
     }
 
-    // Fire Mode ºñÈ°¼ºÈ­
-    public void DisableFireMode()
+    public void DisableJumpBoost()
     {
-        _isFireMode = false;
+        _isJumpBoost = false;
     }
 
+    public float GetFinalJumpForce()
+    {
+        return _isJumpBoost
+            ? _jumpForce * _jumpBoostMultiplier
+            : _jumpForce;
+    }
+
+    // ===============================
+    // Jump ì²˜ë¦¬
+    // ===============================
     private void HandleCoyoteTime()
     {
         if (_isGrounded)
-        {
-            // ¶¥¿¡ ÀÖÀ¸¸é Ä«¿îÅÍ ¸®¼Â
             _coyoteTimeCounter = _coyoteTime;
-        }
-
         else
-        {
-            // °øÁßÀÌ¸é ½Ã°£ °¨¼Ò
             _coyoteTimeCounter -= Time.deltaTime;
-        }
     }
 
     private void HandleJumpBuffer()
     {
         if (_jumpBufferCounter > 0)
-        _jumpBufferCounter -= Time.deltaTime;
+            _jumpBufferCounter -= Time.deltaTime;
     }
 
     public bool CanJump()
     {
-        bool result = _coyoteTimeCounter > 0 && _jumpBufferCounter > 0;
-
-        return result;
+        return _coyoteTimeCounter > 0 && _jumpBufferCounter > 0;
     }
 
     public void ConsumeJump()
     {
         _coyoteTimeCounter = 0;
         _jumpBufferCounter = 0;
+    }
+
+    public void PerformJump()
+    {
+        float finalJumpForce = GetFinalJumpForce();
+
+        _rb.linearVelocity = new Vector2(
+            _rb.linearVelocity.x,
+            finalJumpForce);
     }
 
     private void CutJump()
@@ -199,27 +224,43 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void Flip() // ¹æÇâÀüÈ¯
+    // ===============================
+    // ì´ë™
+    // ===============================
+    void Movement()
     {
-        if(_moveInput > 0 && !_isFacingRight)
+        _rb.linearVelocity = new Vector2(
+            _moveInput * _moveSpeed,
+            _rb.linearVelocity.y);
+    }
+
+    // ===============================
+    // ë°©í–¥ ì „í™˜
+    // ===============================
+    private void Flip()
+    {
+        if (_moveInput > 0 && !_isFacingRight)
         {
             _isFacingRight = true;
-
-            Vector3 scale = _originalScale;
-            scale.x = Mathf.Abs(scale.x);
-            transform.localScale = scale;
+            SetScaleDirection(1);
         }
-
-        else if(_moveInput < 0 && _isFacingRight)
+        else if (_moveInput < 0 && _isFacingRight)
         {
             _isFacingRight = false;
-
-            Vector3 scale = _originalScale;
-            scale.x = -Mathf.Abs(scale.x);
-            transform.localScale = scale;
+            SetScaleDirection(-1);
         }
     }
 
+    private void SetScaleDirection(int dir)
+    {
+        Vector3 scale = _originalScale;
+        scale.x = Mathf.Abs(scale.x) * dir;
+        transform.localScale = scale;
+    }
+
+    // ===============================
+    // Ground ì²´í¬
+    // ===============================
     void IsGround()
     {
         RaycastHit2D hit = Physics2D.Raycast(
@@ -228,14 +269,12 @@ public class PlayerController : MonoBehaviour
             _groundCheckDistance,
             _groudLayer);
 
-        Debug.DrawRay(_groundCheck.position,
-        Vector2.down * _groundCheckDistance,
-        Color.green);
+        Debug.DrawRay(
+            _groundCheck.position,
+            Vector2.down * _groundCheckDistance,
+            Color.green);
 
         _isGrounded = hit.collider != null;
-
-        if (_isGrounded)
-            Debug.Log("¹Ù´Ú °¨ÁöµÊ");
     }
 
     void OnMove(InputAction.CallbackContext ctx)
@@ -247,21 +286,10 @@ public class PlayerController : MonoBehaviour
     public void OnJump(InputAction.CallbackContext ctx)
     {
         if (ctx.performed)
-        {
-            Debug.Log("Á¡ÇÁ ÀÔ·Â °¨ÁöµÊ");
             _jumpBufferCounter = _jumpBufferTime;
-        }
 
         if (ctx.canceled)
-        {
             CutJump();
-        }
-
-    }
-
-    void Movement()
-    {
-        _rb.linearVelocity = new Vector2(_moveInput * _moveSpeed, _rb.linearVelocity.y);
     }
 
     private void OnDrawGizmos()
@@ -269,7 +297,8 @@ public class PlayerController : MonoBehaviour
         if (_groundCheck == null) return;
 
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(_groundCheck.position,
+        Gizmos.DrawLine(
+            _groundCheck.position,
             _groundCheck.position + Vector3.down * _groundCheckDistance);
     }
 }
