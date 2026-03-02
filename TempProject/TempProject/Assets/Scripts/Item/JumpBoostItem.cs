@@ -1,9 +1,9 @@
 using UnityEngine;
 
-public class FireModeItem : ItemBase
+public class JumpBoostItem : ItemBase
 {
     protected override void ApplyEffect(PlayerController player)
     {
-        player.EnableFireMode();
+        player.EnableJumpBoost();
     }
 }
