@@ -28,7 +28,7 @@ public class FireballPool : MonoBehaviour
 
     private void CreateNewFireball()
     {
-        Fireball fb = Instantiate(_fireballPrefab, transform);
+        Fireball fb = Instantiate(_fireballPrefab);
         fb.SetPool(this);
         fb.gameObject.SetActive(false);
         _pool.Enqueue(fb);

@@ -7,6 +7,9 @@ public class EnemyHealth : MonoBehaviour, IDamagable
 
     private int _currentHP;
 
+    // Àû ÆÀ ¹ÝÈ¯
+    public TeamType Team => TeamType.Enemy;
+
     void Awake()
     {
         _currentHP = _maxHP;
