@@ -273,10 +273,10 @@ MonoBehaviour:
   _groudLayer:
     serializedVersion: 2
     m_Bits: 64
-  _fireballPool: {fileID: 6005442329074498334, guid: 1ef680b5c4e6cf64e96b43e33e0f7232, type: 3}
+  _fireballPoolPrefab: {fileID: 6005442329074498334, guid: 1ef680b5c4e6cf64e96b43e33e0f7232, type: 3}
   _isFireMode: 0
   _jumpBoostMultiplier: 1.5
-  _jumpBoostDuration: 5
+  _jumpBoostDuration: 10
   _fireCooldown: 0.3
   _moveSpeed: 5
   _jumpForce: 5

@@ -15,6 +15,9 @@ public class PlayerHealth : MonoBehaviour, IDamagable
 
     public event Action OnDeath;
 
+    public int CurrentHP => _currentHP;
+    public int MaxHP => _maxHP;
+
     // 플레이어 팀 반환
     public TeamType Team => TeamType.Player;
 

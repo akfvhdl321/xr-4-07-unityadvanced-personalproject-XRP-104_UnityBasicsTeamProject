@@ -1,17 +1,17 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class Fireball : MonoBehaviour
 {
-    [Header("ÀÌµ¿ ¼³Á¤")]
+    [Header("ì´ë™ ì„¤ì •")]
     [SerializeField] private float _speed = 8f;
 
-    [Header("»ıÁ¸ ½Ã°£")]
+    [Header("ìƒì¡´ ì‹œê°„")]
     [SerializeField] private float _lifeTime = 3f;
 
     [SerializeField] private Transform _visual;
 
     private Rigidbody2D _rb;
-    private SpriteRenderer _spriteRenderer;   // ½ºÇÁ¶óÀÌÆ® ·»´õ·¯ ÂüÁ¶
+    private SpriteRenderer _spriteRenderer;   // ìŠ¤í”„ë¼ì´íŠ¸ ë Œë”ëŸ¬ ì°¸ì¡°
     private Vector2 _direction;
     private float _timer;
 
@@ -21,20 +21,23 @@ public class Fireball : MonoBehaviour
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
-        _spriteRenderer = GetComponent<SpriteRenderer>(); // Ãß°¡
+        _spriteRenderer = GetComponent<SpriteRenderer>(); // ì¶”ê°€
     }
 
     private void OnEnable()
     {
+        Debug.Log("Fireball OnEnable");
         _timer = 0f;
     }
 
     private void Update()
     {
+        Debug.Log("Fireball Update ì‹¤í–‰");
         _timer += Time.deltaTime;
 
         if (_timer >= _lifeTime)
         {
+            Debug.Log("LifeTime ì´ˆê³¼");
             ReturnToPool();
         }
     }
@@ -46,7 +49,7 @@ public class Fireball : MonoBehaviour
 
         _rb.linearVelocity = _direction * _speed;
 
-        // ½ºÇÁ¶óÀÌÆ®°¡ À§ÂÊ ±âÁØÀÌ¹Ç·Î -90µµ º¸Á¤
+        // ìŠ¤í”„ë¼ì´íŠ¸ê°€ ìœ„ìª½ ê¸°ì¤€ì´ë¯€ë¡œ -90ë„ ë³´ì •
         float angle = Mathf.Atan2(_direction.y, _direction.x) * Mathf.Rad2Deg;
         _visual.rotation = Quaternion.Euler(0, 0, angle + 90f);
     }
@@ -71,6 +74,7 @@ public class Fireball : MonoBehaviour
 
     private void ReturnToPool()
     {
+        Debug.Log("ğŸ”¥ ReturnToPool í˜¸ì¶œë¨");
         _rb.linearVelocity = Vector2.zero;
 
         if (_pool != null)

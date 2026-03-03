@@ -14,7 +14,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] LayerMask _groudLayer;
 
     [Header("Fireball Pool")]
-    [SerializeField] private FireballPool _fireballPool;
+    [SerializeField] private FireballPool _fireballPoolPrefab;
+    private FireballPool _fireballPool;
 
     [Header("Fire Mode")]
     [SerializeField] private bool _isFireMode = false;
@@ -55,6 +56,7 @@ public class PlayerController : MonoBehaviour
     // UI 접근용 프로퍼티
     // ===============================
     public bool IsJumpBoostActive => _isJumpBoost;
+    public bool IsFireModeActive => _isFireMode;
 
     public float JumpBoostRemainingTime =>
         Mathf.Max(0f, _jumpBoostEndTime - Time.time);
@@ -62,6 +64,11 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         _inputActions = new InputSystem_Actions();
+        // FireballPool 자동 생성
+        if (_fireballPoolPrefab != null)
+        {
+            _fireballPool = Instantiate(_fireballPoolPrefab);
+        }
         Init();
     }
 
@@ -146,13 +153,22 @@ public class PlayerController : MonoBehaviour
     // ===============================
     public void Fire()
     {
-        if (!_isFireMode) return;
+        Debug.Log(" Fire() 호출됨");
+        if (!_isFireMode)
+        {
+            Debug.Log("FireMode 꺼져있음");
+            return;
+        }
         if (Time.time < _lastFireTime + _fireCooldown) return;
 
         _lastFireTime = Time.time;
 
         Fireball fb = _fireballPool.GetFireball();
-        if (fb == null) return;
+        if (fb == null)
+        {
+            Debug.Log("Fireball null 반환됨");
+            return;
+        }
 
         fb.transform.position = transform.position;
 
@@ -162,7 +178,11 @@ public class PlayerController : MonoBehaviour
         fb.Init(dir, TeamType.Player);
     }
 
-    public void EnableFireMode() => _isFireMode = true;
+    public void EnableFireMode()
+    {
+        _isFireMode = true;
+        Debug.Log("Fire Mode 활성화됨");
+    }
 
     public void DisableFireMode() => _isFireMode = false;
 

@@ -13,7 +13,7 @@ public class FireballPool : MonoBehaviour
 
     [Header("동시 활성 제한")]
     [Tooltip("화면 내 최대 Fireball 개수")]
-    [SerializeField] private int _maxActiveCount = 3;
+    [SerializeField] private int _maxActiveCount = 10;
 
     private Queue<Fireball> _pool = new Queue<Fireball>();
     private int _currentActiveCount;
@@ -41,11 +41,18 @@ public class FireballPool : MonoBehaviour
 
     public Fireball GetFireball()
     {
+        Debug.Log("현재 ActiveCount: " + _currentActiveCount);
+        Debug.Log("현재 PoolCount: " + _pool.Count);
+
         if (!CanSpawn())
+        {
+            Debug.Log("CanSpawn 실패");
             return null;
+        }
 
         if (_pool.Count == 0)
         {
+            Debug.Log("Pool 비어있음 → 새로 생성");
             CreateNewFireball();
         }
 

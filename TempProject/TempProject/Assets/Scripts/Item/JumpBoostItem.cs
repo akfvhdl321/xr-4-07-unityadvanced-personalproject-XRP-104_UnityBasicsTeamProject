@@ -4,7 +4,7 @@ public class JumpBoostItem : ItemBase
 {
     protected override void ApplyEffect(PlayerController player)
     {
-        Debug.Log("Jump Boost 활성화");
+        Debug.Log("JumpBoostItem ApplyEffect 호출됨");
         player.EnableJumpBoost();
     }
 }
