@@ -1,19 +1,25 @@
-using System;
+ï»¿using System;
 using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour, IDamagable
 {
-    [Header("Ã¼·Â ¼³Á¤")]
+    [Header("ì²´ë ¥ ì„¤ì •")]
     [SerializeField] private int _maxHP = 3;
 
-    [Header("ÇÇ°Ý ÈÄ ¹«Àû½Ã°£")]
+    [Header("í”¼ê²© í›„ ë¬´ì ì‹œê°„")]
     [SerializeField] private float _invincibleTime = 1f;
 
     private int _currentHP;
-    private bool _isInvincible; // ¹«Àû º¯¼ö
-    private float _invincibleTimer;// ¹«Àû½Ã°£
+    private bool _isInvincible;
+    private float _invincibleTimer;
 
     public event Action OnDeath;
+
+    public int CurrentHP => _currentHP;
+    public int MaxHP => _maxHP;
+
+    // í”Œë ˆì´ì–´ íŒ€ ë°˜í™˜
+    public TeamType Team => TeamType.Player;
 
     private void Awake()
     {
@@ -30,14 +36,14 @@ public class PlayerHealth : MonoBehaviour, IDamagable
         if (_isInvincible) return;
 
         _currentHP -= damage;
-
-        Debug.Log("ÇöÀç HP : " + _currentHP);
+        Debug.Log("í˜„ìž¬ HP : " + _currentHP);
 
         if (_currentHP <= 0)
         {
             Die();
             return;
         }
+
         StartInvincible();
     }
 
@@ -61,7 +67,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
 
     private void Die()
     {
-        Debug.Log("ÇÃ·¹ÀÌ¾î »ç¸Á");
+        Debug.Log("í”Œë ˆì´ì–´ ì‚¬ë§");
         OnDeath?.Invoke();
         GetComponent<PlayerController>().DisableFireMode();
     }
@@ -71,6 +77,4 @@ public class PlayerHealth : MonoBehaviour, IDamagable
         _currentHP = _maxHP;
         _isInvincible = false;
     }
-
-    
 }

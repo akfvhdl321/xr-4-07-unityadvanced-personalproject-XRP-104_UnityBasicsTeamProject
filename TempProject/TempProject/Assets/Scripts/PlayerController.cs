@@ -14,7 +14,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] LayerMask _groudLayer;
 
     [Header("Fireball Pool")]
-    [SerializeField] private FireballPool _fireballPool;
+    [SerializeField] private FireballPool _fireballPoolPrefab;
+    private FireballPool _fireballPool;
 
     [Header("Fire Mode")]
     [SerializeField] private bool _isFireMode = false;
@@ -55,12 +56,19 @@ public class PlayerController : MonoBehaviour
     // UI 접근용 프로퍼티
     // ===============================
     public bool IsJumpBoostActive => _isJumpBoost;
+    public bool IsFireModeActive => _isFireMode;
 
     public float JumpBoostRemainingTime =>
         Mathf.Max(0f, _jumpBoostEndTime - Time.time);
 
     private void Awake()
     {
+        _inputActions = new InputSystem_Actions();
+        // FireballPool 자동 생성
+        if (_fireballPoolPrefab != null)
+        {
+            _fireballPool = Instantiate(_fireballPoolPrefab);
+        }
         Init();
     }
 
@@ -75,6 +83,8 @@ public class PlayerController : MonoBehaviour
 
     private void OnDisable()
     {
+        if (_inputActions == null) return;
+
         _inputActions.Player.Move.performed -= OnMove;
         _inputActions.Player.Move.canceled -= OnMove;
         _inputActions.Player.Jump.performed -= OnJump;
@@ -109,6 +119,11 @@ public class PlayerController : MonoBehaviour
 
     private void Init()
     {
+        if (GameManager.Instance == null)
+        {
+            Debug.LogError("GameManager가 씬에 존재하지 않습니다.");
+            return;
+        }
         _rb = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
         _playerHealth = GetComponent<PlayerHealth>();
@@ -117,7 +132,7 @@ public class PlayerController : MonoBehaviour
         GameManager.Instance.RegisterPlayer(_playerRespawn, _playerHealth);
 
         _stateMachine = new PlayerStateMachine();
-        _inputActions = new InputSystem_Actions();
+        
 
         _originalScale = transform.localScale;
 
@@ -138,21 +153,36 @@ public class PlayerController : MonoBehaviour
     // ===============================
     public void Fire()
     {
-        if (!_isFireMode) return;
+        Debug.Log(" Fire() 호출됨");
+        if (!_isFireMode)
+        {
+            Debug.Log("FireMode 꺼져있음");
+            return;
+        }
         if (Time.time < _lastFireTime + _fireCooldown) return;
 
         _lastFireTime = Time.time;
 
         Fireball fb = _fireballPool.GetFireball();
-        if (fb == null) return;
+        if (fb == null)
+        {
+            Debug.Log("Fireball null 반환됨");
+            return;
+        }
 
         fb.transform.position = transform.position;
 
         Vector2 dir = transform.localScale.x > 0 ? Vector2.right : Vector2.left;
-        fb.Init(dir);
+
+        // 팀 정보 전달
+        fb.Init(dir, TeamType.Player);
     }
 
-    public void EnableFireMode() => _isFireMode = true;
+    public void EnableFireMode()
+    {
+        _isFireMode = true;
+        Debug.Log("Fire Mode 활성화됨");
+    }
 
     public void DisableFireMode() => _isFireMode = false;
 
@@ -162,12 +192,18 @@ public class PlayerController : MonoBehaviour
     public void EnableJumpBoost()
     {
         _isJumpBoost = true;
-        _jumpBoostEndTime = Time.time + _jumpBoostDuration; // ★ 갱신 방식
+        _jumpBoostEndTime = Time.time + _jumpBoostDuration; // 갱신 방식
+
+        Debug.Log("점프 부스트 활성화");
     }
 
     public void DisableJumpBoost()
     {
+        if (!_isJumpBoost) return;
+
         _isJumpBoost = false;
+
+        Debug.Log($"점프 부스트 해제 (지속시간: {_jumpBoostDuration}초)");
     }
 
     public float GetFinalJumpForce()
