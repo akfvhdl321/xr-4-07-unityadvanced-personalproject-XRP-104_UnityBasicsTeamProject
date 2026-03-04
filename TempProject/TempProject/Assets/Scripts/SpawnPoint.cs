@@ -4,7 +4,10 @@ public class SpawnPoint : MonoBehaviour
 {
     private void Awake()
     {
-        GameManager.Instance.SetCheckpoint(transform.position);
+        if (!GameManager.Instance.HasCheckpoint())
+        {
+            GameManager.Instance.SetCheckpoint(transform.position);
+        }
     }
 
     private void Start()

@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 908378408750870315}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.146, z: 0}
+  m_LocalPosition: {x: 0, y: -0.1528, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -149,7 +149,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: -6367560908665664636, guid: 708cbe72f07d35f4abfa04cecad3cb73, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -232,6 +232,9 @@ MonoBehaviour:
   _jumpBoostMultiplier: 1.5
   _jumpBoostDuration: 10
   _deathY: -10
+  _knockbackForceX: 5
+  _knockbackForceY: 3
+  _knockbackDuration: 0.2
   _fireCooldown: 0.3
   _moveSpeed: 5
   _jumpForce: 5
@@ -251,6 +254,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   _maxHP: 3
   _invincibleTime: 1
+  _sprite: {fileID: 0}
 --- !u!114 &3596910573583687761
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -309,8 +313,9 @@ EdgeCollider2D:
   - {x: 0.11957093, y: -0.033025548}
   - {x: 0.10078738, y: -0.06137055}
   - {x: 0.121680185, y: -0.10005774}
-  - {x: 0.06956017, y: -0.16558817}
-  - {x: -0.06454136, y: -0.16544387}
+  - {x: 0.072589986, y: -0.16180089}
+  - {x: 0.071598954, y: -0.16104156}
+  - {x: -0.062269, y: -0.16165659}
   - {x: -0.11211356, y: -0.101230696}
   - {x: -0.09273672, y: -0.06922369}
   - {x: -0.118693374, y: -0.018635303}

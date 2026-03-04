@@ -54,11 +54,10 @@ public class GameOverUI : MonoBehaviour
     /// </summary>
     public void OnClickRetry()
     {
-        _panel.SetActive(false);
-
-        GameManager.Instance.RespawnPlayer();
-
         Time.timeScale = 1f;
+
+        Scene current = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(current.name); // ¾À ¸®·Îµå
     }
 
     private void OnDestroy()
