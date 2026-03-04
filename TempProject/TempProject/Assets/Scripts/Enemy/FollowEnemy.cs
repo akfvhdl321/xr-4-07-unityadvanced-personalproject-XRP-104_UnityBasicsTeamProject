@@ -27,6 +27,9 @@ public class FollowEnemy : MonoBehaviour
     [Tooltip("바닥 레이어")]
     [SerializeField] private LayerMask _groundLayer;
 
+    [SerializeField] private float _followEnterRange = 4f;
+    [SerializeField] private float _followExitRange = 5f;
+
     private Rigidbody2D _rb;
     private Transform _player;
     private BoxCollider2D _col;
@@ -43,32 +46,46 @@ public class FollowEnemy : MonoBehaviour
 
         _originalScale = transform.localScale;
 
-        PlayerController player = FindAnyObjectByType<PlayerController>();
-        if (player != null)
-            _player = player.transform;
-
         _startPosition = transform.position;
         _currentState = State.Patrol;
     }
 
+    private void Start()
+    {
+        PlayerController player = GameManager.Instance.GetPlayer();
+
+        if (player != null)
+        {
+            _player = player.transform;
+        }
+    }
+
     private void FixedUpdate()
     {
-        // 상태 결정
+        if (_player == null)
+        {
+            PlayerController player = GameManager.Instance.GetPlayer();
+            if (player != null)
+                _player = player.transform;
+        }
+
         if (_player != null)
         {
             float distance = Vector2.Distance(transform.position, _player.position);
 
-            if (distance <= _detectRange)
+            if (_currentState == State.Patrol && distance <= _followEnterRange)
+            {
                 _currentState = State.Follow;
-            else
+            }
+            else if (_currentState == State.Follow && distance >= _followExitRange)
+            {
                 _currentState = State.Patrol;
-        }
-        else
-        {
-            _currentState = State.Patrol;
+
+                // Patrol 기준점 갱신 위치
+                _startPosition = transform.position;
+            }
         }
 
-        // 상태 실행
         switch (_currentState)
         {
             case State.Patrol:

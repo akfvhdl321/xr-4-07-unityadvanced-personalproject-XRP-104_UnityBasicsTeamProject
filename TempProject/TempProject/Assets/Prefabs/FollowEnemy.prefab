@@ -65,11 +65,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FollowEnemy
   _moveSpeed: 2
   _detectRange: 5
-  _patrolDistance: 3
+  _patrolDistance: 5
   _groundCheckDistance: 0.5
   _groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  _followEnterRange: 4
+  _followExitRange: 5
 --- !u!50 &7289142925063399178
 Rigidbody2D:
   serializedVersion: 5
@@ -229,7 +231,7 @@ Transform:
   m_GameObject: {fileID: 2113529823397391951}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.15, z: 0}
+  m_LocalPosition: {x: -0.029, y: 0.936, z: 0}
   m_LocalScale: {x: 1.9846876, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -269,7 +271,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.012271836, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -279,7 +281,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.0245436, y: 1}
   m_EdgeRadius: 0
 --- !u!114 &29448838499731835
 MonoBehaviour:
