@@ -1,11 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// 기본은 Patrol
-/// 플레이어 감지 시 Follow
-/// 플랫폼 끝에서 낙사하지 않음
-/// 스케일 유지 + 방향 반전 안정화
-/// </summary>
 public class FollowEnemy : MonoBehaviour
 {
     private enum State
@@ -157,5 +151,20 @@ public class FollowEnemy : MonoBehaviour
         Debug.DrawRay(origin, Vector2.down * _groundCheckDistance, Color.red);
 
         return hit.collider != null;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!other.TryGetComponent<IDamagable>(out IDamagable target))
+            return;
+
+        if (target.Team == TeamType.Enemy)
+            return;
+
+        // 플레이어 위치가 Enemy 위쪽이면 무시 (스톰프 우선)
+        if (other.transform.position.y > transform.position.y + 0.2f)
+            return;
+
+        target.TakeDamage(1);
     }
 }

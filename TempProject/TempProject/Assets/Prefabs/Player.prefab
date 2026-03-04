@@ -72,12 +72,12 @@ GameObject:
   m_Component:
   - component: {fileID: 1195119227573207509}
   - component: {fileID: 3194848323963528706}
-  - component: {fileID: 1902710373883531441}
   - component: {fileID: 1622019960744677227}
   - component: {fileID: 6830956726611476291}
   - component: {fileID: 8045978225900480728}
   - component: {fileID: 1501142298544603849}
   - component: {fileID: 3596910573583687761}
+  - component: {fileID: 8400622539960729450}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -161,52 +161,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!61 &1902710373883531441
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8000530364003388419}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.32, y: 0.32}
-    newSize: {x: 0.32, y: 0.32}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 0.32, y: 0.32}
-  m_EdgeRadius: 0
 --- !u!50 &1622019960744677227
 Rigidbody2D:
   serializedVersion: 5
@@ -277,6 +231,7 @@ MonoBehaviour:
   _isFireMode: 0
   _jumpBoostMultiplier: 1.5
   _jumpBoostDuration: 10
+  _deathY: -10
   _fireCooldown: 0.3
   _moveSpeed: 5
   _jumpForce: 5
@@ -308,3 +263,61 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cee3a4eab25fc72409f99fba4a1b117a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerRespawn
+--- !u!68 &8400622539960729450
+EdgeCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8000530364003388419}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_EdgeRadius: 0
+  m_Points:
+  - {x: -0.030803293, y: 0.0916952}
+  - {x: -0.019383784, y: 0.097923994}
+  - {x: 0.008645916, y: 0.102076545}
+  - {x: 0.09092539, y: 0.07683435}
+  - {x: 0.101141684, y: 0.056235753}
+  - {x: 0.117854156, y: 0.014271667}
+  - {x: 0.11957093, y: -0.033025548}
+  - {x: 0.10078738, y: -0.06137055}
+  - {x: 0.121680185, y: -0.10005774}
+  - {x: 0.06956017, y: -0.16558817}
+  - {x: -0.06454136, y: -0.16544387}
+  - {x: -0.11211356, y: -0.101230696}
+  - {x: -0.09273672, y: -0.06922369}
+  - {x: -0.118693374, y: -0.018635303}
+  - {x: -0.10015687, y: 0.03581839}
+  - {x: -0.06283696, y: 0.07068272}
+  - {x: -0.028812813, y: 0.09311734}
+  m_AdjacentStartPoint: {x: 0, y: 0}
+  m_AdjacentEndPoint: {x: 0, y: 0}
+  m_UseAdjacentStartPoint: 0
+  m_UseAdjacentEndPoint: 0

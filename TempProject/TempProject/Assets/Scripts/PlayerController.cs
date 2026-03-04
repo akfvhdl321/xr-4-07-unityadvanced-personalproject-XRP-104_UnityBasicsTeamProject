@@ -24,6 +24,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _jumpBoostMultiplier = 1.5f;
     [SerializeField] private float _jumpBoostDuration = 5f;
 
+    [Header("Death")]
+    [SerializeField] private float _deathY = -10f;
+
     private bool _isJumpBoost;
     private float _jumpBoostEndTime;
 
@@ -51,6 +54,9 @@ public class PlayerController : MonoBehaviour
 
     private Vector3 _originalScale;
     private bool _isFacingRight = true;
+
+    private bool _isDead;
+
 
     // ===============================
     // UI 접근용 프로퍼티
@@ -115,6 +121,9 @@ public class PlayerController : MonoBehaviour
             DisableJumpBoost();
 
         _stateMachine.Update();
+
+        CheckFallDeath();
+
     }
 
     private void Init()
@@ -141,6 +150,7 @@ public class PlayerController : MonoBehaviour
         Jump = new JumpState(this);
 
         _stateMachine.ChangeState(Idle);
+
     }
 
     public void ChangeState(IPlayerState newState)
@@ -176,6 +186,17 @@ public class PlayerController : MonoBehaviour
 
         // 팀 정보 전달
         fb.Init(dir, TeamType.Player);
+    }
+
+    private void CheckFallDeath()
+    {
+        if (_isDead) return;
+
+        if (transform.position.y < _deathY)
+        {
+            _isDead = true;
+            _playerHealth.TakeDamage(999);
+        }
     }
 
     public void EnableFireMode()

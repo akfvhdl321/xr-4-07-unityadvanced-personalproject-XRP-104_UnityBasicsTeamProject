@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);   // 추가
         }
         else
         {
@@ -23,6 +24,12 @@ public class GameManager : MonoBehaviour
     // 플레이어 시작시 호출
     public void RegisterPlayer(PlayerRespawn respawn, PlayerHealth health)
     {
+        // 기존 구독 제거
+        if (_playerHealth != null)
+        {
+            _playerHealth.OnDeath -= HandlePlayerDeath;
+        }
+
         _playerRespawn = respawn;
         _playerHealth = health;
 
@@ -41,8 +48,8 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("GameManager 사망 감지");
 
-        _playerRespawn.Respawn(_currentCheckpointPosition);
-        _playerHealth.ResetHealth();
+        //_playerRespawn.Respawn(_currentCheckpointPosition);
+        //_playerHealth.ResetHealth();
     }
 
 }

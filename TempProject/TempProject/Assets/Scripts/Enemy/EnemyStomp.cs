@@ -14,21 +14,20 @@ public class EnemyStomp : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player"))
+        if (!other.TryGetComponent<PlayerController>(out var player))
             return;
 
-        Rigidbody2D playerRb = other.GetComponent<Rigidbody2D>();
+        Rigidbody2D playerRb = player._rb;
 
-        // 플레이어가 아래 방향으로 떨어지고 있을 때만 인정
-        if (playerRb.linearVelocity.y <= 0)
+        // 아래 방향으로 떨어지고 있을 때만
+        if (playerRb.linearVelocity.y < -0.1f)
         {
-            // 적 사망
             _enemyHealth.TakeDamage(1);
 
-            // 플레이어 튕김
             playerRb.linearVelocity = new Vector2(
                 playerRb.linearVelocity.x,
-                _bounceForce);
+                _bounceForce
+            );
         }
     }
 }
