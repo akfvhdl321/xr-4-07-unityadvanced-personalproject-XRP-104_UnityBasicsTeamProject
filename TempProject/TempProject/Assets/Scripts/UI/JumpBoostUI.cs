@@ -22,7 +22,7 @@ public class JumpBoostUI : MonoBehaviour
         if (_player.IsJumpBoostActive)
         {
             float remain = _player.JumpBoostRemainingTime;
-            _text.text = "Jump Boost: " + remain.ToString("F1") + "s";
+            _text.text = "점프 부스트 시간: " + remain.ToString("F1") + "s";
             _text.gameObject.SetActive(true);
         }
         else
