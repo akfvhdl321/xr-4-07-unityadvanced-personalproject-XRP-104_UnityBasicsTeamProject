@@ -2,13 +2,13 @@ using UnityEngine;
 
 public class SpawnPoint : MonoBehaviour
 {
-    private void Awake()
+    /*private void Awake()
     {
         if (!GameManager.Instance.HasCheckpoint())
         {
             GameManager.Instance.SetCheckpoint(transform.position);
         }
-    }
+    }*/
 
     private void Start()
     {
