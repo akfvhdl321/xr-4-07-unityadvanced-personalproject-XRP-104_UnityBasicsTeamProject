@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6607525370479863025}
   - component: {fileID: 1306988648750844585}
   - component: {fileID: 1735501128318824459}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: JumpBoostItem
   m_TagString: Untagged
   m_Icon: {fileID: 0}

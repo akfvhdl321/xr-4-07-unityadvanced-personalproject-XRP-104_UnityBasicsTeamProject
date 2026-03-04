@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
-
+using System.Collections;
 public class PlayerController : MonoBehaviour
 {
     PlayerStateMachine _stateMachine;
@@ -26,6 +26,13 @@ public class PlayerController : MonoBehaviour
 
     [Header("Death")]
     [SerializeField] private float _deathY = -10f;
+
+    [Header("Hit Knockback")]
+    [SerializeField] private float _knockbackForceX = 5f;
+    [SerializeField] private float _knockbackForceY = 3f;
+    [SerializeField] private float _knockbackDuration = 0.2f;
+
+    private bool _isKnockback;
 
     private bool _isJumpBoost;
     private float _jumpBoostEndTime;
@@ -55,7 +62,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 _originalScale;
     private bool _isFacingRight = true;
 
-    private bool _isDead;
+    // private bool _isDead;
 
 
     // ===============================
@@ -75,6 +82,11 @@ public class PlayerController : MonoBehaviour
         {
             _fireballPool = Instantiate(_fireballPoolPrefab);
         }
+        
+    }
+
+    private void Start()
+    {
         Init();
     }
 
@@ -128,18 +140,10 @@ public class PlayerController : MonoBehaviour
 
     private void Init()
     {
-        if (GameManager.Instance == null)
-        {
-            Debug.LogError("GameManager가 씬에 존재하지 않습니다.");
-            return;
-        }
         _rb = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
         _playerHealth = GetComponent<PlayerHealth>();
-        _playerRespawn = GetComponent<PlayerRespawn>();
-
-        GameManager.Instance.RegisterPlayer(_playerRespawn, _playerHealth);
-
+        
         _stateMachine = new PlayerStateMachine();
         
 
@@ -156,6 +160,29 @@ public class PlayerController : MonoBehaviour
     public void ChangeState(IPlayerState newState)
     {
         _stateMachine.ChangeState(newState);
+    }
+
+    public void ApplyKnockback(Vector2 attackerPosition)
+    {
+        if (_isKnockback) return;
+
+        float dir = transform.position.x > attackerPosition.x ? 1f : -1f;
+
+        _rb.linearVelocity = new Vector2(
+            dir * _knockbackForceX,
+            _knockbackForceY
+        );
+
+        StartCoroutine(KnockbackRoutine());
+    }
+
+    private IEnumerator KnockbackRoutine()
+    {
+        _isKnockback = true;
+
+        yield return new WaitForSeconds(_knockbackDuration);
+
+        _isKnockback = false;
     }
 
     // ===============================
@@ -190,12 +217,9 @@ public class PlayerController : MonoBehaviour
 
     private void CheckFallDeath()
     {
-        if (_isDead) return;
-
         if (transform.position.y < _deathY)
         {
-            _isDead = true;
-            _playerHealth.TakeDamage(999);
+            _playerHealth.TakeDamage(999, transform.position);
         }
     }
 
@@ -286,6 +310,9 @@ public class PlayerController : MonoBehaviour
     // ===============================
     void Movement()
     {
+        if (_isKnockback)
+            return;
+
         _rb.linearVelocity = new Vector2(
             _moveInput * _moveSpeed,
             _rb.linearVelocity.y);

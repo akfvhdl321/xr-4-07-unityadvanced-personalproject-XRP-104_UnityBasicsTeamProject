@@ -4,5 +4,5 @@ using UnityEngine;
 public interface IDamagable
 {
     TeamType Team { get; }     // ¼Ò¼Ó ÆÀ
-    void TakeDamage(int damage);
+    void TakeDamage(int damage, Vector2 attackerPosition);
 }

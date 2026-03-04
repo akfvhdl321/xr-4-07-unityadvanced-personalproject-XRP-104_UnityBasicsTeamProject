@@ -1,10 +1,19 @@
 using UnityEngine;
 using TMPro;
 
+/// <summary>
+/// JumpBoost 남은 시간 표시 UI
+/// </summary>
 public class JumpBoostUI : MonoBehaviour
 {
-    [SerializeField] private PlayerController _player;
     [SerializeField] private TextMeshProUGUI _text;
+
+    private PlayerController _player;
+
+    private void Start()
+    {
+        _player = GameManager.Instance.GetPlayer();
+    }
 
     private void Update()
     {

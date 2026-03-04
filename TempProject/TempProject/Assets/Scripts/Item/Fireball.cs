@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Fireball 투사체
+/// Enemy 또는 Ground에만 반응
+/// </summary>
 public class Fireball : MonoBehaviour
 {
     [Header("이동 설정")]
@@ -11,7 +15,6 @@ public class Fireball : MonoBehaviour
     [SerializeField] private Transform _visual;
 
     private Rigidbody2D _rb;
-    private SpriteRenderer _spriteRenderer;   // 스프라이트 렌더러 참조
     private Vector2 _direction;
     private float _timer;
 
@@ -21,23 +24,19 @@ public class Fireball : MonoBehaviour
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
-        _spriteRenderer = GetComponent<SpriteRenderer>(); // 추가
     }
 
     private void OnEnable()
     {
-        Debug.Log("Fireball OnEnable");
         _timer = 0f;
     }
 
     private void Update()
     {
-        Debug.Log("Fireball Update 실행");
         _timer += Time.deltaTime;
 
         if (_timer >= _lifeTime)
         {
-            Debug.Log("LifeTime 초과");
             ReturnToPool();
         }
     }
@@ -49,7 +48,6 @@ public class Fireball : MonoBehaviour
 
         _rb.linearVelocity = _direction * _speed;
 
-        // 스프라이트가 위쪽 기준이므로 -90도 보정
         float angle = Mathf.Atan2(_direction.y, _direction.x) * Mathf.Rad2Deg;
         _visual.rotation = Quaternion.Euler(0, 0, angle + 90f);
     }
@@ -61,20 +59,32 @@ public class Fireball : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.TryGetComponent<IDamagable>(out IDamagable target))
-        {
-            if (target.Team == _ownerTeam)
-                return;
+        int layer = collision.gameObject.layer;
 
-            target.TakeDamage(1);
+        // Enemy 레이어만 데미지 처리
+        if (layer == LayerMask.NameToLayer("Enemy"))
+        {
+            if (collision.TryGetComponent<IDamagable>(out IDamagable target))
+            {
+                if (target.Team != _ownerTeam)
+                {
+                    target.TakeDamage(1, transform.position);
+                }
+            }
+
+            ReturnToPool();
+        }
+        // Ground 레이어 맞으면 제거
+        else if (layer == LayerMask.NameToLayer("Ground"))
+        {
+            ReturnToPool();
         }
 
-        ReturnToPool();
+        // 나머지는 무시 (Checkpoint, Item 등)
     }
 
     private void ReturnToPool()
     {
-        Debug.Log("🔥 ReturnToPool 호출됨");
         _rb.linearVelocity = Vector2.zero;
 
         if (_pool != null)
