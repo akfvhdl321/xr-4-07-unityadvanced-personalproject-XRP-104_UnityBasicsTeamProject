@@ -15,7 +15,7 @@ public class EnemyHealth : MonoBehaviour, IDamagable
         _currentHP = _maxHP;
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage, Vector2 attackerPosition)
     {
         _currentHP -= damage;
 

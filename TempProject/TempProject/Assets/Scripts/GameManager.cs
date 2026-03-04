@@ -1,55 +1,99 @@
+using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// 게임 전체 흐름을 관리하는 중앙 관리자
+/// - Player 생성
+/// - 체크포인트 관리
+/// - 리스폰 처리
+/// - UI에서 Player 접근 가능하도록 제공
+/// </summary>
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    private Vector3 _currentCheckpointPosition;
+    [Header("플레이어 프리팹")]
+    [SerializeField] private PlayerController _playerPrefab;
 
-    private PlayerRespawn _playerRespawn;
-    private PlayerHealth _playerHealth;
+    private PlayerController _spawnedPlayer;
+
+    private Vector3 _currentCheckpointPosition;
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);   // 추가
         }
         else
         {
             Destroy(gameObject);
+            return;
         }
     }
-    // 플레이어 시작시 호출
-    public void RegisterPlayer(PlayerRespawn respawn, PlayerHealth health)
+
+    private void Start()
     {
-        // 기존 구독 제거
-        if (_playerHealth != null)
+        // SpawnPoint를 직접 찾아 위치 설정 (실행 순서 의존 제거)
+        SpawnPoint spawn = FindAnyObjectByType<SpawnPoint>();
+
+        if (spawn != null)
         {
-            _playerHealth.OnDeath -= HandlePlayerDeath;
+            _currentCheckpointPosition = spawn.transform.position;
+        }
+        else
+        {
+            Debug.LogError("SpawnPoint가 씬에 없습니다.");
         }
 
-        _playerRespawn = respawn;
-        _playerHealth = health;
-
-        _playerHealth.OnDeath += HandlePlayerDeath;
+        SpawnPlayer();
     }
-    // 체크포인트 저장
+
+    /// <summary>
+    /// 런타임 Player 생성
+    /// </summary>
+    private void SpawnPlayer()
+    {
+        _spawnedPlayer = Instantiate(
+            _playerPrefab,
+            _currentCheckpointPosition,
+            Quaternion.identity
+        );
+    }
+
+    /// <summary>
+    /// UI에서 현재 생성된 Player 접근용
+    /// </summary>
+    public PlayerController GetPlayer()
+    {
+        return _spawnedPlayer;
+    }
+
+    /// <summary>
+    /// 체크포인트 저장
+    /// </summary>
     public void SetCheckpoint(Vector3 position)
     {
         _currentCheckpointPosition = position;
-
-        Debug.Log("체크포인트 저장 위치: " + position);
     }
 
-    // 플레이어 사망 시 호출
-    private void HandlePlayerDeath()
+    /// <summary>
+    /// 플레이어 리스폰
+    /// </summary>
+    public void RespawnPlayer()
     {
-        Debug.Log("GameManager 사망 감지");
+        if (_spawnedPlayer == null) return;
 
-        //_playerRespawn.Respawn(_currentCheckpointPosition);
-        //_playerHealth.ResetHealth();
+        _spawnedPlayer.transform.position =
+            _currentCheckpointPosition + Vector3.up * 2f;
+
+        PlayerHealth health = _spawnedPlayer.GetComponent<PlayerHealth>();
+
+        if (health != null)
+        {
+            health.ResetHealth();
+            health.StartCoroutine(
+                health.RespawnInvincibleRoutine(1.5f));
+        }
     }
-
 }

@@ -57,7 +57,7 @@ public class PatrolEnemy : MonoBehaviour
         if (other.transform.position.y > transform.position.y + 0.2f)
             return;
 
-        target.TakeDamage(1);
+        target.TakeDamage(1, transform.position);
     }
 
     private bool IsGroundAhead()

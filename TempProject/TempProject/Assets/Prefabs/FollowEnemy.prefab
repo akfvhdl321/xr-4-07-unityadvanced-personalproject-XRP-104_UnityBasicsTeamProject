@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7289142925063399178}
   - component: {fileID: 3610427120603834943}
   - component: {fileID: 582577987439279462}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: FollowEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -213,7 +213,7 @@ GameObject:
   - component: {fileID: 7915284137357625438}
   - component: {fileID: 6679574029654812991}
   - component: {fileID: 29448838499731835}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -303,7 +303,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 202707126165408430}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: GroundCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}

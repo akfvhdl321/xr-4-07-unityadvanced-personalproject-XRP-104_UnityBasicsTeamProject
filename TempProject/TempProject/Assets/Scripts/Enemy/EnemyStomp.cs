@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class EnemyStomp : MonoBehaviour
 {
@@ -22,7 +23,7 @@ public class EnemyStomp : MonoBehaviour
         // 아래 방향으로 떨어지고 있을 때만
         if (playerRb.linearVelocity.y < -0.1f)
         {
-            _enemyHealth.TakeDamage(1);
+            _enemyHealth.TakeDamage(1, other.transform.position);
 
             playerRb.linearVelocity = new Vector2(
                 playerRb.linearVelocity.x,
