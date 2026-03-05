@@ -9,35 +9,33 @@ public class FollowEnemy : MonoBehaviour
     }
 
     [Header("공통 이동 설정")]
-    [Tooltip("기본 이동 속도")]
     [SerializeField] private float _moveSpeed = 2f;
 
-    [Header("감지 설정")]
-    [Tooltip("플레이어 감지 거리")]
+    [Header("플레이어 감지 거리")]
     [SerializeField] private float _detectRange = 5f;
 
-    [Header("Patrol 설정")]
-    [Tooltip("좌우 이동 거리")]
+    [Header("Patrol 이동 거리")]
     [SerializeField] private float _patrolDistance = 3f;
 
-    [Header("낙사 방지 설정")]
-    [Tooltip("바닥 감지 거리")]
+    [Header("낙사 방지")]
     [SerializeField] private float _groundCheckDistance = 0.5f;
-
-    [Tooltip("바닥 레이어")]
     [SerializeField] private LayerMask _groundLayer;
 
-    [SerializeField] private float _followEnterRange = 4f;
-    [SerializeField] private float _followExitRange = 5f;
+    [Header("데미지 쿨타임")]
+    [SerializeField] private float _damageCooldown = 0.2f;
 
     private Rigidbody2D _rb;
     private Transform _player;
     private BoxCollider2D _col;
 
     private State _currentState;
+
     private Vector2 _startPosition;
-    private int _direction = 1; // 1 = 오른쪽, -1 = 왼쪽
+    private int _direction = 1;
+
     private Vector3 _originalScale;
+
+    private float _lastDamageTime;
 
     private void Awake()
     {
@@ -47,43 +45,36 @@ public class FollowEnemy : MonoBehaviour
         _originalScale = transform.localScale;
 
         _startPosition = transform.position;
+
         _currentState = State.Patrol;
     }
 
-    private void Start()
+    // GameManager에서 Player 전달
+    public void SetPlayer(Transform player)
     {
-        PlayerController player = GameManager.Instance.GetPlayer();
-
-        if (player != null)
-        {
-            _player = player.transform;
-        }
+        _player = player;
     }
 
     private void FixedUpdate()
     {
         if (_player == null)
+            return;
+
+        float distance = Vector2.Distance(transform.position, _player.position);
+
+        if (distance <= _detectRange)
         {
-            PlayerController player = GameManager.Instance.GetPlayer();
-            if (player != null)
-                _player = player.transform;
+            _currentState = State.Follow;
         }
-
-        if (_player != null)
+        else
         {
-            float distance = Vector2.Distance(transform.position, _player.position);
-
-            if (_currentState == State.Patrol && distance <= _followEnterRange)
+            // Follow → Patrol 전환 시 기준 위치 리셋
+            if (_currentState == State.Follow)
             {
-                _currentState = State.Follow;
-            }
-            else if (_currentState == State.Follow && distance >= _followExitRange)
-            {
-                _currentState = State.Patrol;
-
-                // Patrol 기준점 갱신 위치
                 _startPosition = transform.position;
             }
+
+            _currentState = State.Patrol;
         }
 
         switch (_currentState)
@@ -99,8 +90,9 @@ public class FollowEnemy : MonoBehaviour
     }
 
     // ===============================
-    // Patrol 동작
+    // Patrol
     // ===============================
+
     private void Patrol()
     {
         float movedDistance = transform.position.x - _startPosition.x;
@@ -114,13 +106,13 @@ public class FollowEnemy : MonoBehaviour
     }
 
     // ===============================
-    // Follow 동작
+    // Follow
     // ===============================
+
     private void Follow()
     {
         float delta = _player.position.x - transform.position.x;
 
-        // 너무 가까울 때 방향이 0 되는 현상 방지
         if (Mathf.Abs(delta) > 0.1f)
         {
             _direction = delta > 0 ? 1 : -1;
@@ -135,11 +127,15 @@ public class FollowEnemy : MonoBehaviour
     }
 
     // ===============================
-    // 실제 이동 적용 (공통 처리)
+    // 이동 처리
     // ===============================
+
     private void ApplyMovement()
     {
-        _rb.linearVelocity = new Vector2(_direction * _moveSpeed, _rb.linearVelocity.y);
+        _rb.linearVelocity = new Vector2(
+            _direction * _moveSpeed,
+            _rb.linearVelocity.y
+        );
 
         transform.localScale = new Vector3(
             _originalScale.x * _direction,
@@ -149,8 +145,9 @@ public class FollowEnemy : MonoBehaviour
     }
 
     // ===============================
-    // 바닥 감지 (Collider 기준 안정 방식)
+    // 바닥 체크
     // ===============================
+
     private bool IsGroundAhead()
     {
         Vector2 origin = new Vector2(
@@ -170,18 +167,35 @@ public class FollowEnemy : MonoBehaviour
         return hit.collider != null;
     }
 
+    // ===============================
+    // 플레이어 충돌
+    // ===============================
+
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.TryGetComponent<IDamagable>(out IDamagable target))
+        PlayerController player = other.GetComponent<PlayerController>();
+
+        if (player == null)
             return;
 
-        if (target.Team == TeamType.Enemy)
+        // 플레이어 발 위치
+        float playerBottom = other.bounds.min.y;
+
+        // 적 머리 위치
+        float enemyTop = _col.bounds.max.y;
+
+        // 플레이어가 적 머리 위에 있으면 밟기 상황
+        if (playerBottom > enemyTop - 0.05f)
+        {
+            return;
+        }
+
+        // 데미지 쿨타임
+        if (Time.time - _lastDamageTime < _damageCooldown)
             return;
 
-        // 플레이어 위치가 Enemy 위쪽이면 무시 (스톰프 우선)
-        if (other.transform.position.y > transform.position.y + 0.2f)
-            return;
+        _lastDamageTime = Time.time;
 
-        target.TakeDamage(1, transform.position);
+        player.GetComponent<IDamagable>()?.TakeDamage(1, transform.position);
     }
 }
