@@ -54,7 +54,10 @@ public class GameManager : MonoBehaviour
 
     private void InitializeSpawnPoint()
     {
-        // 현재 씬의 SpawnPoint를 항상 다시 찾음
+        // 체크포인트가 이미 있으면 유지
+        if (_currentCheckpointPosition != Vector3.zero)
+            return;
+
         SpawnPoint spawn = FindAnyObjectByType<SpawnPoint>();
 
         if (spawn != null)
@@ -72,25 +75,27 @@ public class GameManager : MonoBehaviour
 
     private void SpawnPlayer()
     {
-        Debug.Log("SpawnPlayer 호출됨");
-        if (_playerPrefab == null)
-        {
-            Debug.LogError("PlayerPrefab 연결 안됨");
-            return;
-        }
+        if (_playerPrefab == null) return;
 
         _spawnedPlayer = Instantiate(
             _playerPrefab,
             _currentCheckpointPosition,
             Quaternion.identity
         );
-        Debug.Log("Player 생성 완료");
 
         // Cinemachine 연결
         CinemachineCamera cam = FindAnyObjectByType<CinemachineCamera>();
         if (cam != null)
         {
             cam.Follow = _spawnedPlayer.transform;
+        }
+
+        // Enemy에게 Player 전달
+        FollowEnemy[] enemies = FindObjectsByType<FollowEnemy>(FindObjectsSortMode.None);
+
+        foreach (var enemy in enemies)
+        {
+            enemy.SetPlayer(_spawnedPlayer.transform);
         }
     }
 

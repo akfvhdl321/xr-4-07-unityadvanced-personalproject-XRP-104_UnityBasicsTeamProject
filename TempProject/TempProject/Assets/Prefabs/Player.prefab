@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 908378408750870315}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.1528, z: 0}
+  m_LocalPosition: {x: 0.0007, y: -0.1656, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -77,7 +77,7 @@ GameObject:
   - component: {fileID: 8045978225900480728}
   - component: {fileID: 1501142298544603849}
   - component: {fileID: 3596910573583687761}
-  - component: {fileID: 8400622539960729450}
+  - component: {fileID: 7916699875302381413}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -184,9 +184,9 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!95 &6830956726611476291
 Animator:
@@ -237,7 +237,7 @@ MonoBehaviour:
   _knockbackDuration: 0.2
   _fireCooldown: 0.3
   _moveSpeed: 5
-  _jumpForce: 5
+  _jumpForce: 6
   _coyoteTime: 0.15
   _jumpBufferTime: 0.15
 --- !u!114 &1501142298544603849
@@ -267,7 +267,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cee3a4eab25fc72409f99fba4a1b117a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerRespawn
---- !u!68 &8400622539960729450
+--- !u!68 &7916699875302381413
 EdgeCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -304,24 +304,29 @@ EdgeCollider2D:
   m_Offset: {x: 0, y: 0}
   m_EdgeRadius: 0
   m_Points:
-  - {x: -0.030803293, y: 0.0916952}
-  - {x: -0.019383784, y: 0.097923994}
-  - {x: 0.008645916, y: 0.102076545}
-  - {x: 0.09092539, y: 0.07683435}
-  - {x: 0.101141684, y: 0.056235753}
-  - {x: 0.117854156, y: 0.014271667}
-  - {x: 0.11957093, y: -0.033025548}
-  - {x: 0.10078738, y: -0.06137055}
-  - {x: 0.121680185, y: -0.10005774}
-  - {x: 0.072589986, y: -0.16180089}
-  - {x: 0.071598954, y: -0.16104156}
-  - {x: -0.062269, y: -0.16165659}
-  - {x: -0.11211356, y: -0.101230696}
-  - {x: -0.09273672, y: -0.06922369}
-  - {x: -0.118693374, y: -0.018635303}
-  - {x: -0.10015687, y: 0.03581839}
-  - {x: -0.06283696, y: 0.07068272}
-  - {x: -0.028812813, y: 0.09311734}
+  - {x: 0.117228374, y: 0.03560029}
+  - {x: 0.11722839, y: -0.024996072}
+  - {x: 0.107381456, y: -0.061353907}
+  - {x: 0.11419856, y: -0.08180517}
+  - {x: 0.11647091, y: -0.09998408}
+  - {x: 0.10662402, y: -0.1196779}
+  - {x: 0.09003603, y: -0.12376064}
+  - {x: 0.083927535, y: -0.14036706}
+  - {x: 0.077977374, y: -0.1465844}
+  - {x: 0.06197594, y: -0.16210532}
+  - {x: 0.0029108261, y: -0.16271034}
+  - {x: -0.011444051, y: -0.16257365}
+  - {x: -0.05173861, y: -0.16198653}
+  - {x: -0.06195463, y: -0.1604153}
+  - {x: -0.07607871, y: -0.15176184}
+  - {x: -0.08366245, y: -0.13523234}
+  - {x: -0.10601022, y: -0.10882719}
+  - {x: -0.10825149, y: -0.085659124}
+  - {x: -0.11766493, y: -0.030837772}
+  - {x: -0.1082457, y: 0.031999208}
+  - {x: -0.03921057, y: 0.08786476}
+  - {x: 0.072221085, y: 0.0869383}
+  - {x: 0.117582545, y: 0.03408545}
   m_AdjacentStartPoint: {x: 0, y: 0}
   m_AdjacentEndPoint: {x: 0, y: 0}
   m_UseAdjacentStartPoint: 0

@@ -40,6 +40,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _fireCooldown = 0.3f;
     private float _lastFireTime;
 
+    // 현재 밟고 있는 플랫폼
+    private Rigidbody2D _currentPlatform;
+
+    // 플랫폼 이전 위치 (플랫폼 이동량 계산)
+    private Vector2 _lastPlatformPosition;
+
     public Rigidbody2D _rb { get; private set; }
     public Animator _animator { get; private set; }
 
@@ -113,6 +119,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         Movement();
+        ApplyPlatformMovement();
     }
 
     private void Update()
@@ -359,6 +366,28 @@ public class PlayerController : MonoBehaviour
             Color.green);
 
         _isGrounded = hit.collider != null;
+
+        if (_isGrounded)
+        {
+            Rigidbody2D platformRb = hit.collider.GetComponent<Rigidbody2D>();
+
+            if (platformRb != null)
+            {
+                if (_currentPlatform != platformRb)
+                {
+                    _currentPlatform = platformRb;
+                    _lastPlatformPosition = platformRb.position;
+                }
+            }
+            else
+            {
+                _currentPlatform = null;
+            }
+        }
+        else
+        {
+            _currentPlatform = null;
+        }
     }
 
     void OnMove(InputAction.CallbackContext ctx)
@@ -384,5 +413,18 @@ public class PlayerController : MonoBehaviour
         Gizmos.DrawLine(
             _groundCheck.position,
             _groundCheck.position + Vector3.down * _groundCheckDistance);
+    }
+
+    private void ApplyPlatformMovement()
+    {
+        if (!_isGrounded) return;
+        if (_currentPlatform == null) return;
+
+        Vector2 platformDelta = _currentPlatform.position - _lastPlatformPosition;
+
+        // 플레이어 위치에 플랫폼 이동량 적용
+        _rb.position += platformDelta;
+
+        _lastPlatformPosition = _currentPlatform.position;
     }
 }

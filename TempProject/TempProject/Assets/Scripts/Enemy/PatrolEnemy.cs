@@ -3,20 +3,23 @@ using UnityEngine;
 public class PatrolEnemy : MonoBehaviour
 {
     [Header("이동 설정")]
-    [Tooltip("이동 속도")]
     [SerializeField] private float _moveSpeed = 2f;
 
-    [Tooltip("이동 거리")]
     [SerializeField] private float _moveDistance = 3f;
 
     [Header("낙사 방지 설정")]
     [SerializeField] private float _groundCheckDistance = 0.5f;
     [SerializeField] private LayerMask _groundLayer;
 
+    [Header("데미지 쿨타임")]
+    [SerializeField] private float _damageCooldown = 0.2f;
+
     private BoxCollider2D _col;
 
     private Vector3 _startPosition;
     private bool _movingRight = true;
+
+    private float _lastDamageTime;
 
     private void Awake()
     {
@@ -53,9 +56,18 @@ public class PatrolEnemy : MonoBehaviour
         if (target.Team == TeamType.Enemy)
             return;
 
-        // 플레이어 위치가 Enemy 위쪽이면 무시 (스톰프 우선)
-        if (other.transform.position.y > transform.position.y + 0.2f)
+        // 데미지 쿨타임
+        if (Time.time - _lastDamageTime < _damageCooldown)
             return;
+
+        float playerBottom = other.bounds.min.y;
+        float enemyTop = _col.bounds.max.y;
+
+        // 위에서 밟았을 경우 공격하지 않음
+        if (playerBottom > enemyTop - 0.1f)
+            return;
+
+        _lastDamageTime = Time.time;
 
         target.TakeDamage(1, transform.position);
     }

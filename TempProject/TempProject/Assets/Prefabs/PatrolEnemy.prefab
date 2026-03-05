@@ -49,12 +49,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a284ec902f875db4abdabfa84aa7f6b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PatrolEnemy
-  _moveSpeed: 2
+  _moveSpeed: 4
   _moveDistance: 3
   _groundCheckDistance: 0.5
   _groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  _damageCooldown: 0.2
 --- !u!114 &9214337333566591738
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,7 +143,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 8bfadec067237c04ab16144f6847e733, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
