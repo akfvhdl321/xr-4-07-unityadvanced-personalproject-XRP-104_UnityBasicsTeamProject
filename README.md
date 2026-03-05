@@ -1,212 +1,368 @@
-2D 액션 플랫폼 게임
+# 2D 액션 플랫폼 게임 기술 문서
 
-Unity로 제작한 2D 횡스크롤 액션 플랫폼 게임 프로젝트입니다.
+## 프로젝트 개요
 
-플랫폼 게임의 핵심 요소인 점프 컨트롤, 적 AI, 아이템 시스템, 투사체 시스템을 구현했습니다.
+**프로젝트 이름**\
+2D Action Platformer
 
-프로젝트 소개
+**장르**\
+2D 횡스크롤 액션 플랫폼 게임
 
-본 프로젝트는 다음과 같은 시스템을 직접 구현하여 제작한 게임입니다.
+**플레이타임**\
+약 8 \~ 12분
 
-플레이어 이동 및 점프
+**개발 환경**
 
-상태 머신 기반 플레이어 구조
+  항목              내용
+  ----------------- --------------------
+  Engine            Unity 6
+  Language          C#
+  Camera            Cinemachine
+  Input             Unity Input System
+  Version Control   Git / GitHub
 
-적 AI (Patrol / Follow)
+------------------------------------------------------------------------
 
-아이템 시스템
+# 프로젝트 목표
 
-Fireball 투사체 시스템
+플랫폼 게임에서 중요한 다음 요소를 구현하는 것을 목표로 제작했습니다.
 
-체크포인트 리스폰
+  시스템               목적
+  -------------------- --------------------
+  플레이어 상태 머신   캐릭터 행동 구조화
+  Enemy AI             기본 AI 설계
+  아이템 시스템        게임 플레이 확장
+  투사체 시스템        전투 요소
+  체크포인트 시스템    플레이 흐름 유지
+  UI 시스템            상태 정보 전달
 
-UI 시스템
+------------------------------------------------------------------------
 
-주요 기능
-Player 시스템
-플레이어는 다음 기능을 수행할 수 있습니다.
+# 전체 시스템 아키텍처
 
-좌우 이동
+게임 시스템은 다음과 같은 구조로 구성됩니다.
 
-점프
+    GameManager
+     ├ Player System
+     │   ├ PlayerController
+     │   ├ PlayerHealth
+     │   └ PlayerRespawn
+     │
+     ├ Enemy System
+     │   ├ PatrolEnemy
+     │   ├ FollowEnemy
+     │   └ EnemyHealth
+     │
+     ├ Combat System
+     │   └ IDamagable Interface
+     │
+     ├ Item System
+     │   ├ ItemBase
+     │   ├ JumpBoostItem
+     │   └ FireModeItem
+     │
+     ├ Projectile System
+     │   ├ Fireball
+     │   └ FireballPool
+     │
+     └ UI System
+         ├ PlayerHPUI
+         ├ FireModeUI
+         ├ JumpBoostUI
+         └ GameOverUI
 
-점프 보정 시스템
+------------------------------------------------------------------------
 
-Fireball 발사
+# Player 시스템
 
-피격 및 넉백
+## PlayerController
 
-점프 안정화 시스템
-플랫폼 게임에서 점프 감각을 개선하기 위해 두 가지 기능을 구현했습니다.
+플레이어 동작을 관리하는 핵심 클래스입니다.
 
-Coyote Time
+### 주요 기능
 
-플랫폼에서 떨어진 직후에도 일정 시간 동안 점프가 가능합니다.
+  기능       설명
+  ---------- ----------------------
+  이동       좌우 이동
+  점프       점프 및 점프 보정
+  상태머신   Idle / Move / Jump
+  피격       넉백 및 무적
+  아이템     JumpBoost / FireMode
+  투사체     Fireball 발사
 
-플랫폼 끝
-↓
-0.15초 동안 점프 가능
-Jump Buffer
+------------------------------------------------------------------------
 
-착지 직전에 점프 버튼을 눌러도 점프가 실행됩니다.
+# Player 상태 머신
 
-점프 입력
-↓
-착지
-↓
-즉시 점프
-Enemy 시스템
+플레이어 동작은 **State Machine 패턴**을 사용하여 구현했습니다.
+
+### 상태 구조
+
+    Idle
+     ↑  ↓
+    Move
+     ↓
+    Jump
+
+### 상태 인터페이스
+
+``` csharp
+public interface IPlayerState
+{
+    void Enter();
+    void Update();
+    void Exit();
+}
+```
+
+### 상태 전환 코드
+
+``` csharp
+public void ChangeState(IPlayerState newState)
+{
+    _currentState?.Exit();
+    _currentState = newState;
+    _currentState.Enter();
+}
+```
+
+------------------------------------------------------------------------
+
+# 점프 시스템
+
+플랫폼 게임에서 점프 감각을 개선하기 위해 다음 기술을 사용했습니다.
+
+## Coyote Time
+
+플랫폼에서 떨어진 직후에도 일정 시간 동안 점프가 가능하도록 하는
+기술입니다.
+
+    플랫폼 끝
+    ↓
+    0.15초 동안 점프 가능
+
+------------------------------------------------------------------------
+
+## Jump Buffer
+
+착지 직전에 점프 버튼을 눌러도 점프가 실행되는 기능입니다.
+
+    점프 입력
+    ↓
+    착지
+    ↓
+    즉시 점프
+
+------------------------------------------------------------------------
+
+# Enemy 시스템
+
 적은 두 가지 타입으로 구성됩니다.
 
-Enemy	설명
-PatrolEnemy	일정 거리 좌우 순찰
-FollowEnemy	플레이어 감지 시 추적
-PatrolEnemy
+  Enemy         설명
+  ------------- ---------------------
+  PatrolEnemy   일정 거리 좌우 순찰
+  FollowEnemy   플레이어 추적
+
+------------------------------------------------------------------------
+
+## PatrolEnemy
+
 기능
 
-좌우 이동
+-   좌우 이동
+-   낭떠러지 감지
+-   플레이어 접촉 데미지
 
-낭떠러지 감지
+Raycast를 사용하여 발 앞쪽의 바닥을 감지합니다.
 
-플레이어 접촉 시 데미지
+    Enemy
+     ↓
+    Raycast
+     ↓
+    Ground
 
-적은 Raycast를 사용하여 발 앞쪽의 바닥을 감지합니다.
+바닥이 없으면 이동 방향을 반전합니다.
 
-Enemy
- ↓
-Raycast
- ↓
-Ground
-바닥이 없으면 방향을 반전합니다.
+------------------------------------------------------------------------
 
-FollowEnemy
+## FollowEnemy
+
 FollowEnemy는 플레이어를 감지하면 추적합니다.
 
 플레이어 감지 조건
 
-X 거리
+-   X 거리
+-   Y 높이
 
-Y 높이
+높이 조건을 사용하는 이유
 
-높이를 체크하는 이유
+플랫폼 게임에서는 다른 층에 있는 플레이어를 추적하면 AI 동작이
+부자연스러워질 수 있기 때문입니다.
 
-다른 층에 있는 플레이어를 추적하지 않도록 하기 위해서입니다.
+------------------------------------------------------------------------
 
-전투 시스템
-데미지는 인터페이스 기반 구조로 구현했습니다.
+# Combat 시스템
 
-IDamagable
+데미지는 **인터페이스 기반 구조**로 구현했습니다.
+
+### IDamagable
+
+``` csharp
 public interface IDamagable
 {
     TeamType Team { get; }
     void TakeDamage(int damage, Vector2 attackerPosition);
 }
-이 구조를 사용하면
+```
 
-Player
+이 구조의 장점
 
-Enemy
-
-Projectile
+-   Player
+-   Enemy
+-   Projectile
 
 모든 객체가 동일한 방식으로 데미지를 처리할 수 있습니다.
 
-Enemy 밟기 시스템
-플레이어가 적 위에서 떨어지면 적이 사망합니다.
+------------------------------------------------------------------------
+
+# Enemy 밟기 시스템
+
+플레이어가 적 위에서 떨어질 경우 적이 사망합니다.
 
 조건
 
 플레이어가 아래 방향으로 이동 중일 때
 
-플레이어 낙하
-↓
-Enemy Stomp Trigger
-↓
-Enemy 사망
-Fireball 시스템
-Fireball은 Object Pool 패턴을 사용하여 구현했습니다.
+    플레이어 낙하
+    ↓
+    Enemy Stomp Trigger
+    ↓
+    Enemy 사망
 
-Object Pool
-Object Pool은 오브젝트를 미리 생성하여 재사용하는 기술입니다.
+------------------------------------------------------------------------
+
+# Fireball 시스템
+
+Fireball은 **Object Pool 패턴**을 사용하여 구현했습니다.
+
+## Object Pool
+
+Object Pool은 오브젝트를 미리 생성해 두고 재사용하는 기술입니다.
 
 장점
 
-Instantiate 호출 감소
-
-Garbage Collection 감소
-
-성능 안정성 증가
+-   Instantiate 비용 감소
+-   Garbage Collection 감소
+-   성능 안정성 향상
 
 Fireball 동작
 
-FireballPool
- ↓
-Fireball 생성
- ↓
-발사
- ↓
-충돌
- ↓
-Pool 반환
-Item 시스템
+    FireballPool
+     ↓
+    Fireball 생성
+     ↓
+    발사
+     ↓
+    충돌
+     ↓
+    Pool 반환
+
+------------------------------------------------------------------------
+
+# Item 시스템
+
 아이템은 상속 구조로 구현했습니다.
 
-ItemBase
- ├ JumpBoostItem
- └ FireModeItem
-JumpBoostItem
+    ItemBase
+     ├ JumpBoostItem
+     └ FireModeItem
+
+------------------------------------------------------------------------
+
+## JumpBoostItem
+
 효과
 
-점프력 1.5배 증가
+-   점프력 1.5배 증가
+-   일정 시간 유지
 
-일정 시간 유지
+------------------------------------------------------------------------
 
-FireModeItem
+## FireModeItem
+
 효과
 
-Fireball 공격 사용 가능
+-   Fireball 공격 사용 가능
 
-체크포인트 시스템
+------------------------------------------------------------------------
+
+# GameManager
+
+GameManager는 게임 전체를 관리하는 **Singleton**입니다.
+
+### 주요 역할
+
+  기능              설명
+  ----------------- -------------------------
+  Player 생성       씬 시작 시 생성
+  Checkpoint 저장   리스폰 위치 관리
+  씬 로드 관리      SceneManager 사용
+  Camera 연결       Cinemachine Follow 설정
+
+------------------------------------------------------------------------
+
+# 체크포인트 시스템
+
 체크포인트에 닿으면 플레이어 리스폰 위치가 저장됩니다.
 
-Checkpoint 충돌
-↓
-위치 저장
-↓
-사망
-↓
-해당 위치 리스폰
-UI 시스템
-게임 UI는 다음과 같이 구성되어 있습니다.
+    Checkpoint 충돌
+    ↓
+    위치 저장
+    ↓
+    플레이어 사망
+    ↓
+    해당 위치에서 리스폰
 
-UI	설명
+------------------------------------------------------------------------
 
-체력 UI	플레이어 체력 표시
-FireMode UI	FireMode 활성화 표시
-JumpBoost UI	점프 부스트 시간 표시
-GameOver UI	플레이어 사망 화면
+# UI 시스템
 
-사용 기술
+게임 UI 구성
 
-기술	설명
+  UI             설명
+  -------------- -----------------------
+  체력 UI        플레이어 체력 표시
+  FireMode UI    FireMode 활성화 표시
+  JumpBoost UI   점프 부스트 시간 표시
+  GameOver UI    플레이어 사망 화면
+  Pause UI       게임 일시정지
 
-Unity	게임 엔진
-C#	프로그래밍 언어
-Cinemachine	카메라 시스템
-Unity Input System	입력 처리
-Git / GitHub	버전 관리
+------------------------------------------------------------------------
 
-시스템 구조
-GameManager
- ├ Player System
- ├ Enemy System
- ├ Item System
- ├ Projectile System
- └ UI System
- 
-조작 방법
-키	기능
-A / D	이동
-Space	점프
-F	Fireball
-ESC	일시정지
+# 사용 기술
+
+  기술                 설명
+  -------------------- -----------------
+  Unity                게임 엔진
+  C#                   프로그래밍 언어
+  Cinemachine          카메라 시스템
+  Unity Input System   입력 처리
+  Git / GitHub         버전 관리
+
+------------------------------------------------------------------------
+
+# 결론
+
+본 프로젝트는 다음과 같은 핵심 시스템을 구현한 2D 액션 플랫폼
+게임입니다.
+
+-   플레이어 상태머신
+-   적 AI
+-   아이템 시스템
+-   투사체 시스템
+-   체크포인트 리스폰
+-   UI 시스템
+
+플랫폼 게임의 기본 구조를 설계하고 구현하는 것을 목표로 개발되었습니다.
+
