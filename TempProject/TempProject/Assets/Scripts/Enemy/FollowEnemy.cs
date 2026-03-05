@@ -8,17 +8,20 @@ public class FollowEnemy : MonoBehaviour
         Follow
     }
 
-    [Header("공통 이동 설정")]
+    [Header("이동 속도")]
     [SerializeField] private float _moveSpeed = 2f;
 
     [Header("플레이어 감지 거리")]
     [SerializeField] private float _detectRange = 5f;
 
+    [Header("플레이어 높이 감지 범위")]
+    [SerializeField] private float _heightTolerance = 1.5f;
+
     [Header("Patrol 이동 거리")]
     [SerializeField] private float _patrolDistance = 3f;
 
     [Header("낙사 방지")]
-    [SerializeField] private float _groundCheckDistance = 0.5f;
+    [SerializeField] private float _groundCheckDistance = 0.7f;
     [SerializeField] private LayerMask _groundLayer;
 
     [Header("데미지 쿨타임")]
@@ -60,22 +63,7 @@ public class FollowEnemy : MonoBehaviour
         if (_player == null)
             return;
 
-        float distance = Vector2.Distance(transform.position, _player.position);
-
-        if (distance <= _detectRange)
-        {
-            _currentState = State.Follow;
-        }
-        else
-        {
-            // Follow → Patrol 전환 시 기준 위치 리셋
-            if (_currentState == State.Follow)
-            {
-                _startPosition = transform.position;
-            }
-
-            _currentState = State.Patrol;
-        }
+        UpdateState();
 
         switch (_currentState)
         {
@@ -86,6 +74,35 @@ public class FollowEnemy : MonoBehaviour
             case State.Follow:
                 Follow();
                 break;
+        }
+    }
+
+    // ===============================
+    // 상태 업데이트
+    // ===============================
+
+    private void UpdateState()
+    {
+        float xDistance = Mathf.Abs(
+            transform.position.x - _player.position.x
+        );
+
+        float yDistance = Mathf.Abs(
+            transform.position.y - _player.position.y
+        );
+
+        if (xDistance <= _detectRange && yDistance <= _heightTolerance)
+        {
+            _currentState = State.Follow;
+        }
+        else
+        {
+            if (_currentState == State.Follow)
+            {
+                _startPosition = transform.position;
+            }
+
+            _currentState = State.Patrol;
         }
     }
 
@@ -113,14 +130,15 @@ public class FollowEnemy : MonoBehaviour
     {
         float delta = _player.position.x - transform.position.x;
 
-        if (Mathf.Abs(delta) > 0.1f)
-        {
-            _direction = delta > 0 ? 1 : -1;
-        }
+        int targetDir = delta > 0 ? 1 : -1;
 
+        _direction = targetDir;
+
+        // 낭떠러지면 멈춤
         if (!IsGroundAhead())
         {
-            _direction *= -1;
+            _rb.linearVelocity = new Vector2(0, _rb.linearVelocity.y);
+            return;
         }
 
         ApplyMovement();
@@ -177,20 +195,14 @@ public class FollowEnemy : MonoBehaviour
 
         if (player == null)
             return;
-
         // 플레이어 발 위치
         float playerBottom = other.bounds.min.y;
-
         // 적 머리 위치
         float enemyTop = _col.bounds.max.y;
-
         // 플레이어가 적 머리 위에 있으면 밟기 상황
         if (playerBottom > enemyTop - 0.05f)
-        {
             return;
-        }
 
-        // 데미지 쿨타임
         if (Time.time - _lastDamageTime < _damageCooldown)
             return;
 
